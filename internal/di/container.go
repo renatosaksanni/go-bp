@@ -6,7 +6,7 @@ import (
 	"go-bp/internal/infra/repository"
 	"go-bp/pkg/middleware"
 
-	gwire "github.com/google/wire"
+	"github.com/google/wire"
 )
 
 type Container struct {
@@ -15,13 +15,13 @@ type Container struct {
 }
 
 func BuildContainer() Container {
-	gwire.Build(
+	wire.Build(
 		config.GetDB,
 		config.GetVaultClient,
 		repository.NewRepository,
 		api.NewHandler,
 		middleware.NewAuthMiddleware,
-		gwire.Struct(new(Container), "APIHandler", "AuthMiddleware"),
+		wire.Struct(new(Container), "APIHandler", "AuthMiddleware"),
 	)
 	return Container{}
 }
