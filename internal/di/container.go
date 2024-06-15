@@ -1,10 +1,10 @@
 package di
 
 import (
-	"go-bp/config"
-	"go-bp/internal/api"
-	"go-bp/internal/infra/repository"
-	"go-bp/pkg/middleware"
+	"github.com/renatosaksanni/go-bp/config"
+	"github.com/renatosaksanni/go-bp/internal/api"
+	"github.com/renatosaksanni/go-bp/internal/infra/repository"
+	"github.com/renatosaksanni/go-bp/pkg/middleware"
 
 	"github.com/google/wire"
 )

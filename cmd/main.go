@@ -1,12 +1,13 @@
 package main
 
 import (
-	"go-bp/internal/di"
-	"go-bp/internal/infra"
-	"go-bp/pkg/middleware"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/renatosaksanni/go-bp/internal/di"
+	"github.com/renatosaksanni/go-bp/internal/infra"
+	"github.com/renatosaksanni/go-bp/pkg/middleware"
 
 	"github.com/gorilla/mux"
 )
