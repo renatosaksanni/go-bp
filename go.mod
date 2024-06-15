@@ -1,4 +1,4 @@
-module go-bp
+module github.com/renatosaksanni/go-bp
 
 go 1.20
 
