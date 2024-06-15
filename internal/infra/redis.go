@@ -3,7 +3,7 @@ package infra
 import (
 	"os"
 
-	"github.com/go-redis/redis/v8"
+	redis "github.com/go-redis/redis/v8"
 )
 
 func InitRedis() *redis.Client {

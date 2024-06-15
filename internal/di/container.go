@@ -6,7 +6,7 @@ import (
 	"go-bp/internal/infra/repository"
 	"go-bp/pkg/middleware"
 
-	"github.com/google/wire"
+	wire "github.com/google/wire"
 )
 
 type Container struct {
