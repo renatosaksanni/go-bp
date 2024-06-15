@@ -24,6 +24,9 @@ jobs:
     - name: Verify Go installation
       run: go version
 
+    - name: Clean Go mod cache
+      run: go clean -modcache
+
     - name: Install dependencies
       run: go mod tidy
 
