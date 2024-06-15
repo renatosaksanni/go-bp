@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"sync"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
@@ -10,7 +9,6 @@ import (
 
 type Handler struct {
 	tracer trace.Tracer
-	mu     sync.Mutex
 }
 
 func NewHandler() *Handler {
@@ -24,5 +22,7 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	defer span.End()
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
+	if _, err := w.Write([]byte("OK")); err != nil {
+		http.Error(w, "Failed to write response", http.StatusInternalServerError)
+	}
 }

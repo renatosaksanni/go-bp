@@ -1,13 +1,12 @@
 package utils
 
 import (
-	"fmt"
 	"log"
 )
 
 func LogError(err error) {
 	if err != nil {
-		log.Println(fmt.Sprintf("Error: %v", err))
+		log.Printf("Error: %v", err)
 	}
 }
 
