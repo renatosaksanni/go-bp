@@ -16,7 +16,7 @@ jobs:
       mysql:
         image: mysql:5.7
         ports:
-          - 3307:3306
+          - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: testdb
@@ -57,7 +57,7 @@ jobs:
 
     - name: Run tests and generate coverage report
       env:
-        DATABASE_DSN: root:root@tcp(127.0.0.1:3307)/testdb?charset=utf8mb4&parseTime=True&loc=Local
+        DATABASE_DSN: root:root@tcp(127.0.0.1:3306)/testdb?charset=utf8mb4&parseTime=True&loc=Local
       run: go test -coverprofile=coverage.out -v ./...
 
     - name: Upload coverage reports to Codecov
