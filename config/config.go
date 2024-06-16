@@ -1,17 +1,14 @@
 package config
 
 import (
-	"os"
+	"github.com/renatosaksanni/go-bp/internal/infra"
 
-	"gorm.io/driver/postgres"
+	"github.com/google/wire"
 	"gorm.io/gorm"
 )
 
 func GetDB() *gorm.DB {
-	dsn := os.Getenv("DATABASE_DSN")
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-	return db
+	return infra.InitDB()
 }
+
+var ProviderSet = wire.NewSet(GetDB, GetVaultClient)
