@@ -6,7 +6,10 @@ import (
 )
 
 func TestInitDB(t *testing.T) {
-	os.Setenv("DATABASE_DSN", "host=localhost user=postgres password=postgres dbname=testdb port=5432 sslmode=disable")
+	err := os.Setenv("DATABASE_DSN", "user:password@tcp(127.0.0.1:3306)/testdb?charset=utf8mb4&parseTime=True&loc=Local")
+	if err != nil {
+		t.Fatalf("Failed to set environment variable: %v", err)
+	}
 	db := InitDB()
 	if db == nil {
 		t.Errorf("Database connection is nil")
