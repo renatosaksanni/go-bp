@@ -22,7 +22,7 @@ func TestCORSMiddleware(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, "*", rr.Header().Get("Access-Control-Allow-Origin"))
-		assert.Equal(t, "GET, POST, PUT, DELETE", rr.Header().Get("Access-Control-Allow-Methods"))
+		assert.Equal(t, "GET, POST, PUT, DELETE, OPTIONS", rr.Header().Get("Access-Control-Allow-Methods"))
 	})
 
 	t.Run("Preflight Request", func(t *testing.T) {
@@ -32,6 +32,6 @@ func TestCORSMiddleware(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, "*", rr.Header().Get("Access-Control-Allow-Origin"))
-		assert.Equal(t, "GET, POST, PUT, DELETE", rr.Header().Get("Access-Control-Allow-Methods"))
+		assert.Equal(t, "GET, POST, PUT, DELETE, OPTIONS", rr.Header().Get("Access-Control-Allow-Methods"))
 	})
 }
