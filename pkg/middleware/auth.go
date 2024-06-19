@@ -1,25 +1,49 @@
 package middleware
 
 import (
+	"crypto"
+	"crypto/rsa"
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/pem"
+	"errors"
 	"net/http"
 	"os"
 	"strings"
-
-	"golang.org/x/crypto/ssh"
 )
 
 type AuthMiddleware struct {
-	publicKey ssh.PublicKey
+	publicKey *rsa.PublicKey
 }
 
 func NewAuthMiddleware() (*AuthMiddleware, error) {
 	publicKeyStr := os.Getenv("PUBLIC_KEY")
-	publicKey, _, _, _, err := ssh.ParseAuthorizedKey([]byte(publicKeyStr))
+	pubKey, err := parseRSAPublicKey(publicKeyStr)
 	if err != nil {
 		return nil, err
 	}
 
-	return &AuthMiddleware{publicKey: publicKey}, nil
+	return &AuthMiddleware{publicKey: pubKey}, nil
+}
+
+func parseRSAPublicKey(publicKeyStr string) (*rsa.PublicKey, error) {
+	block, _ := pem.Decode([]byte(publicKeyStr))
+	if block == nil || block.Type != "PUBLIC KEY" {
+		return nil, errors.New("failed to decode PEM block containing public key")
+	}
+
+	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+
+	rsaPub, ok := pub.(*rsa.PublicKey)
+	if !ok {
+		return nil, errors.New("not RSA public key")
+	}
+
+	return rsaPub, nil
 }
 
 func (am *AuthMiddleware) ServeHTTP(next http.Handler) http.Handler {
@@ -41,6 +65,21 @@ func (am *AuthMiddleware) ServeHTTP(next http.Handler) http.Handler {
 }
 
 func (am *AuthMiddleware) verifyToken(token string) bool {
-	// Implement token verification using asymmetric cryptography
-	return true
+	parts := strings.Split(token, ".")
+	if len(parts) != 2 {
+		return false
+	}
+
+	message, signatureStr := parts[0], parts[1]
+	signature, err := base64.StdEncoding.DecodeString(signatureStr)
+	if err != nil {
+		return false
+	}
+
+	hasher := sha256.New()
+	hasher.Write([]byte(message))
+	hashed := hasher.Sum(nil)
+
+	err = rsa.VerifyPKCS1v15(am.publicKey, crypto.SHA256, hashed, signature)
+	return err == nil
 }
