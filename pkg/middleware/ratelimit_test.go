@@ -5,6 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRateLimitMiddleware(t *testing.T) {
@@ -13,33 +15,27 @@ func TestRateLimitMiddleware(t *testing.T) {
 	})
 
 	rateLimiter := NewRateLimiter(1, 1)
-	rr := httptest.NewRecorder()
-	req, err := http.NewRequest("GET", "/", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	wrappedHandler := rateLimiter.RateLimitMiddleware(handler)
 
-	rateLimitHandler := rateLimiter.RateLimitMiddleware(handler)
-	rateLimitHandler.ServeHTTP(rr, req)
+	t.Run("Allow first request", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/", nil)
+		rr := httptest.NewRecorder()
+		wrappedHandler.ServeHTTP(rr, req)
+		assert.Equal(t, http.StatusOK, rr.Code)
+	})
 
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
-	}
+	t.Run("Rate limit second request", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/", nil)
+		rr := httptest.NewRecorder()
+		wrappedHandler.ServeHTTP(rr, req)
+		assert.Equal(t, http.StatusTooManyRequests, rr.Code)
+	})
 
-	// Test rate limit exceeded
-	rr = httptest.NewRecorder()
-	rateLimitHandler.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusTooManyRequests {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusTooManyRequests)
-	}
-
-	// Test rate limit reset after time
-	time.Sleep(time.Second)
-	rr = httptest.NewRecorder()
-	rateLimitHandler.ServeHTTP(rr, req)
-
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
-	}
+	t.Run("Allow request after reset", func(t *testing.T) {
+		time.Sleep(1 * time.Second)
+		req, _ := http.NewRequest("GET", "/", nil)
+		rr := httptest.NewRecorder()
+		wrappedHandler.ServeHTTP(rr, req)
+		assert.Equal(t, http.StatusOK, rr.Code)
+	})
 }

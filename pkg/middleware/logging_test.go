@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLoggingMiddleware(t *testing.T) {
@@ -11,16 +13,13 @@ func TestLoggingMiddleware(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	rr := httptest.NewRecorder()
-	req, err := http.NewRequest("GET", "/", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	wrappedHandler := LoggingMiddleware(handler)
 
-	loggingHandler := LoggingMiddleware(handler)
-	loggingHandler.ServeHTTP(rr, req)
+	t.Run("Log request", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/", nil)
+		rr := httptest.NewRecorder()
+		wrappedHandler.ServeHTTP(rr, req)
 
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
-	}
+		assert.Equal(t, http.StatusOK, rr.Code)
+	})
 }

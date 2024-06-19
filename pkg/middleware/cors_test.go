@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCORSMiddleware(t *testing.T) {
@@ -11,16 +13,25 @@ func TestCORSMiddleware(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	rr := httptest.NewRecorder()
-	req, err := http.NewRequest("GET", "/", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	wrappedHandler := CORSMiddleware(handler)
 
-	corsHandler := CORSMiddleware(handler)
-	corsHandler.ServeHTTP(rr, req)
+	t.Run("Check CORS Headers", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/", nil)
+		rr := httptest.NewRecorder()
+		wrappedHandler.ServeHTTP(rr, req)
 
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
-	}
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, "*", rr.Header().Get("Access-Control-Allow-Origin"))
+		assert.Equal(t, "GET, POST, PUT, DELETE", rr.Header().Get("Access-Control-Allow-Methods"))
+	})
+
+	t.Run("Preflight Request", func(t *testing.T) {
+		req, _ := http.NewRequest("OPTIONS", "/", nil)
+		rr := httptest.NewRecorder()
+		wrappedHandler.ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, "*", rr.Header().Get("Access-Control-Allow-Origin"))
+		assert.Equal(t, "GET, POST, PUT, DELETE", rr.Header().Get("Access-Control-Allow-Methods"))
+	})
 }

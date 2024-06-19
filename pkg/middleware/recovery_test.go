@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRecoveryMiddleware(t *testing.T) {
@@ -11,16 +13,14 @@ func TestRecoveryMiddleware(t *testing.T) {
 		panic("test panic")
 	})
 
-	rr := httptest.NewRecorder()
-	req, err := http.NewRequest("GET", "/", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	wrappedHandler := RecoveryMiddleware(handler)
 
-	recoveryHandler := RecoveryMiddleware(handler)
-	recoveryHandler.ServeHTTP(rr, req)
+	t.Run("Recover from panic", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/", nil)
+		rr := httptest.NewRecorder()
+		wrappedHandler.ServeHTTP(rr, req)
 
-	if status := rr.Code; status != http.StatusInternalServerError {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusInternalServerError)
-	}
+		assert.Equal(t, http.StatusInternalServerError, rr.Code)
+		assert.Contains(t, rr.Body.String(), "Internal Server Error")
+	})
 }
