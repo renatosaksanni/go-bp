@@ -13,7 +13,10 @@ func TestAuthMiddleware(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	authMiddleware := NewAuthMiddleware()
+	authMiddleware, err := NewAuthMiddleware()
+	if err != nil {
+		t.Fatalf("Failed to create auth middleware: %v", err)
+	}
 	wrappedHandler := authMiddleware.ServeHTTP(handler)
 
 	t.Run("Unauthenticated request", func(t *testing.T) {
