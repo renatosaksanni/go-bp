@@ -9,7 +9,7 @@
 # go-bp
 Boilerplate for any future Go language development purposes
 
-## Folders and Files
+### Folders and Files
 
 ### cmd/
 - `main.go`: The main file that runs the application.
