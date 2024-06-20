@@ -7,8 +7,11 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
 func InitTracer() *trace.TracerProvider {
@@ -23,9 +26,10 @@ func InitTracer() *trace.TracerProvider {
 
 	tp := trace.NewTracerProvider(
 		trace.WithSampler(trace.AlwaysSample()),
-		// trace.WithResource(resource.NewWithAttributes(
-		//     attribute.String("service.name", "go-bp"),
-		// )),
+		trace.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			attribute.String("service.name", "go-bp"),
+		)),
 		trace.WithBatcher(exporter),
 	)
 
